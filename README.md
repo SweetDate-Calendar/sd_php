@@ -1,7 +1,17 @@
+![CI](https://github.com/SweetDate-Calendar/sd_php/actions/workflows/ci.yml/badge.svg)
+
 # SweetDate PHP Client SDK
 
 The official PHP SDK for the [SweetDate Calendar Engine](https://sweetdate.io/).  
 This package provides a simple client for interacting with the SweetDate REST API.
+
+---
+
+## Requirements
+
+- PHP **8.1+** (tested on 8.1, 8.2, 8.3)  
+- Composer for dependency management  
+- cURL extension enabled (required by Guzzle)  
 
 ---
 
