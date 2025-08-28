@@ -1,0 +1,9 @@
+[tools]
+# php = "8.3.24"
+
+[env]
+SD_APP_ID = "app_f081defe-9796-4fa1-86d6-bc1aa20af2f8"
+SD_APP_SECRET = "ef0noW-YCFU6asQJnTA_5jOLkEsZDWsfF0tvxFmS7dQ"
+SD_BASE_URL = "http://localhost:4008"
+
+[tasks]

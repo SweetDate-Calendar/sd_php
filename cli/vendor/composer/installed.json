@@ -1,0 +1,32 @@
+{
+    "packages": [
+        {
+            "name": "sweetdate/sdk",
+            "version": "dev-main",
+            "version_normalized": "dev-main",
+            "dist": {
+                "type": "path",
+                "url": "../sdk",
+                "reference": "0b839b7a7aa5656354cdcf4054081be9ef6170cf"
+            },
+            "require": {
+                "php": ">=8.1"
+            },
+            "type": "library",
+            "installation-source": "dist",
+            "autoload": {
+                "psr-4": {
+                    "SweetDate\\": "src/SweetDate/"
+                }
+            },
+            "description": "SweetDate PHP SDK",
+            "transport-options": {
+                "symlink": true,
+                "relative": true
+            },
+            "install-path": "../sweetdate/sdk"
+        }
+    ],
+    "dev": true,
+    "dev-package-names": []
+}
