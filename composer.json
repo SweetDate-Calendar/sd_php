@@ -21,9 +21,12 @@
     }
   },
   "scripts": {
+    "lint": "php-cs-fixer fix --dry-run --diff",
+    "lint:fix": "php-cs-fixer fix",
+    "stan": "phpstan analyse -c phpstan.neon || phpstan analyse src --level=max",
     "test": "vendor/bin/pest -q",
-    "stan": "phpstan analyse src --level=max",
-    "lint": "php-cs-fixer fix --dry-run --diff"
+    "test:unit": "vendor/bin/pest -q tests/Unit",
+    "test:conf": "vendor/bin/pest -q tools/conformance"
   },
   "config": {
     "allow-plugins": {
