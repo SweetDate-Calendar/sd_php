@@ -1,0 +1,11 @@
+# Exclude these from exported archives (composer install --prefer-dist)
+.github export-ignore
+/tests export-ignore
+/examples export-ignore
+/tools export-ignore
+/docs export-ignore
+/sdip export-ignore
+.php-cs-fixer.php export-ignore
+.phpstan.neon export-ignore
+.editorconfig export-ignore
+.gitignore export-ignore

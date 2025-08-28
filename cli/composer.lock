@@ -1,0 +1,46 @@
+{
+    "_readme": [
+        "This file locks the dependencies of your project to a known state",
+        "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
+        "This file is @generated automatically"
+    ],
+    "content-hash": "44ca25d86dacbc8aba0e61608da5cffb",
+    "packages": [
+        {
+            "name": "sweetdate/sdk",
+            "version": "dev-main",
+            "dist": {
+                "type": "path",
+                "url": "../sdk",
+                "reference": "0b839b7a7aa5656354cdcf4054081be9ef6170cf"
+            },
+            "require": {
+                "php": ">=8.1"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "SweetDate\\": "src/SweetDate/"
+                }
+            },
+            "description": "SweetDate PHP SDK",
+            "transport-options": {
+                "symlink": true,
+                "relative": true
+            }
+        }
+    ],
+    "packages-dev": [],
+    "aliases": [],
+    "minimum-stability": "stable",
+    "stability-flags": {
+        "sweetdate/sdk": 20
+    },
+    "prefer-stable": false,
+    "prefer-lowest": false,
+    "platform": {
+        "php": ">=8.1"
+    },
+    "platform-dev": {},
+    "plugin-api-version": "2.6.0"
+}

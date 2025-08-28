@@ -1,0 +1,26 @@
+{
+  "name": "sweetdate/cli",
+  "description": "SweetDate CLI",
+  "type": "project",
+  "require": {
+    "php": ">=8.1",
+    "sweetdate/sdk": "*@dev"
+  },
+  "repositories": [
+    {
+      "type": "path",
+      "url": "../sdk",
+      "options": {
+        "symlink": true
+      }
+    }
+  ],
+  "autoload": {
+    "psr-4": {
+      "SweetDate\\CLI\\": "src/"
+    }
+  },
+  "bin": [
+    "bin/sd"
+  ]
+}

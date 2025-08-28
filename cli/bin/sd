@@ -1,0 +1,120 @@
+#!/usr/bin/env php
+<?php
+declare(strict_types=1);
+
+/**
+ * SweetDate CLI
+ * Usage:
+ *   sd tenants:get-list --limit=25 --offset=0 --q=alpha
+ *   sd --limit=25                       # default command: tenants:get-list
+ */
+
+// ── Autoload (CLI first, then SDK) ──────────────────────────────────────────
+$autoloads = [
+    __DIR__ . '/../vendor/autoload.php',
+    __DIR__ . '/../../sdk/vendor/autoload.php',
+];
+$loaded = false;
+foreach ($autoloads as $autoload) {
+    if (file_exists($autoload)) {
+        require $autoload;
+        $loaded = true;
+        break;
+    }
+}
+if (!$loaded) {
+    fwrite(STDERR, "Autoloader not found. Run 'composer install' in sdk/ and/or cli/.\n");
+    exit(1);
+}
+
+use SweetDate\Tenants;
+
+// ── Parse command + flags ───────────────────────────────────────────────────
+[$cmd, $args] = parseArgs($argv);
+if ($cmd === null) {
+    printUsage();
+    exit(0);
+}
+
+try {
+    switch ($cmd) {
+        case 'tenants:get-list':
+        case 'tenants:get_list':
+        case 'TENANTS.GET_LIST':
+            $limit  = isset($args['limit'])  ? (int)$args['limit']  : 25;
+            $offset = isset($args['offset']) ? (int)$args['offset'] : 0;
+            $q      = $args['q'] ?? null;
+
+            $params = ['limit' => $limit, 'offset' => $offset];
+            if ($q !== null && $q !== '') {
+                $params['q'] = (string)$q;
+            }
+
+            $result = Tenants::getList($params);
+            echo json_encode($result, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES) . PHP_EOL;
+            break;
+
+        default:
+            fwrite(STDERR, "Unknown command: {$cmd}\n");
+            printUsage();
+            exit(1);
+    }
+} catch (Throwable $e) {
+    fwrite(STDERR, "Error: " . $e->getMessage() . PHP_EOL);
+    exit(1);
+}
+
+// ── Helpers ─────────────────────────────────────────────────────────────────
+/**
+ * @return array{0:?string,1:array<string,string|true>}
+ */
+function parseArgs(array $argv): array
+{
+    $argv = array_values($argv);
+    array_shift($argv); // script path
+
+    if (!$argv) {
+        // default to tenants:get-list with no flags
+        return ['tenants:get-list', []];
+    }
+
+    $cmd  = null;
+    $args = [];
+
+    // First non-flag token is the command, everything else are flags
+    foreach ($argv as $i => $token) {
+        if ($cmd === null && $token !== '' && $token[0] !== '-') {
+            $cmd = $token;
+            unset($argv[$i]);
+            break;
+        }
+    }
+
+    // If no explicit command, default to tenants:get-list
+    if ($cmd === null) {
+        $cmd = 'tenants:get-list';
+    }
+
+    foreach ($argv as $token) {
+        if (!is_string($token) || $token === '') continue;
+        if (str_starts_with($token, '--')) {
+            $eq = strpos($token, '=');
+            if ($eq !== false) {
+                $k = substr($token, 2, $eq - 2);
+                $v = substr($token, $eq + 1);
+                $args[$k] = $v;
+            } else {
+                $args[substr($token, 2)] = true;
+            }
+        }
+    }
+    return [$cmd, $args];
+}
+
+function printUsage(): void
+{
+    echo "SweetDate CLI\n";
+    echo "Usage:\n";
+    echo "  sd tenants:get-list --limit=25 --offset=0 --q=alpha\n";
+    echo "  sd --limit=25 --offset=0             # defaults to tenants:get-list\n";
+}
