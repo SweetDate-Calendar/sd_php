@@ -2,9 +2,7 @@
 
 /**
  * Global Pest configuration for this library.
- * Keep it minimal; no Laravel TestCase, no app container, etc.
+ * Keep it minimal; no frameworks.
  */
 
-// Tell Pest to discover tests in the root tests/ folder.
-// You can split into 'Unit' and 'Integration' folders later if you like.
-uses()->in('.');
+uses()->in('.'); // only scan the tests/ folder

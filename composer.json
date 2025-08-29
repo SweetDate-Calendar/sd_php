@@ -5,6 +5,7 @@
   "license": "MIT",
   "require": {
     "php": "^8.1",
+    "ext-sodium": "*",
     "guzzlehttp/guzzle": "^7.9",
     "psr/http-client": "^1.0",
     "psr/http-message": "^2.0"
@@ -24,7 +25,7 @@
     "lint": "php-cs-fixer fix --dry-run --diff",
     "lint:fix": "php-cs-fixer fix",
     "stan": "phpstan analyse -c phpstan.neon || phpstan analyse src --level=max",
-    "test": "vendor/bin/pest -q",
+    "test": "vendor/bin/pest",
     "test:unit": "vendor/bin/pest -q tests/Unit",
     "test:conf": "vendor/bin/pest -q tools/conformance"
   },
