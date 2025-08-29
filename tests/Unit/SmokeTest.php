@@ -1,5 +1,4 @@
 <?php
-
-test('unit smoke', function () {
-    expect(true)->toBeTrue();
+test('sdk boots', function () {
+  expect(true)->toBeTrue();
 });

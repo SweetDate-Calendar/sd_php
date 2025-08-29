@@ -2,8 +2,12 @@
 # php = "8.3.24"
 
 [env]
-SD_APP_ID = "app_f081defe-9796-4fa1-86d6-bc1aa20af2f8"
-SD_APP_SECRET = "ef0noW-YCFU6asQJnTA_5jOLkEsZDWsfF0tvxFmS7dQ"
-SD_BASE_URL = "http://localhost:4008"
+SWEETDATE_BASE_URL = "http://localhost:4008"
+SWEETDATE_APP_ID = "app_f4578a53-9f6c-469d-b241-387b66de033c"
+SWEETDATE_SK_B64URL = "wgyryd1kThzKRC3UnZIZqnzQI0WUkukchW-BgH4PQvU"
+SWEETDATE_TIMEOUT_MS = "10000"
 
 [tasks]
+
+
+
