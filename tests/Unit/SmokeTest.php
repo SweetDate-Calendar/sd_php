@@ -1,4 +1,5 @@
 <?php
+
 test('sdk boots', function () {
-  expect(true)->toBeTrue();
+    expect(true)->toBeTrue();
 });
