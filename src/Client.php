@@ -11,9 +11,6 @@ use SweetDate\Exceptions\ApiException;
 use SweetDate\Exceptions\NotFound;
 use SweetDate\Exceptions\ValidationError;
 
-/**
- * Minimal HTTP client with SignatureV1 support and basic retry.
- */
 final class Client
 {
     private Config $config;
@@ -23,120 +20,95 @@ final class Client
     {
         $this->config = $config;
         $this->http = $http ?? new GuzzleClient([
-          'base_uri' => $this->config->baseUrl,
-          'timeout'  => $this->config->timeoutMs / 1000.0,
+            'base_uri' => $this->config->baseUrl,
+            'timeout'  => $this->config->timeoutMs / 1000.0,
+            'http_errors' => false,
         ]);
     }
 
     /**
-     * Perform a request against a path (must begin with "/").
-     * Adds SweetDate SignatureV1 headers if appId + key present.
+     * Perform a request with automatic signing + error mapping.
      *
-     * @param array<string,mixed> $options  Guzzle options (json, query, headers, etc.)
+     * @param array<string,mixed> $options
      */
-    public function request(string $method, string $pathWithLeadingSlash, array $options = []): ResponseInterface
+    public function request(string $method, string $path, array $options = []): ResponseInterface
     {
-        $method = strtoupper($method);
-        if ($pathWithLeadingSlash === '' || $pathWithLeadingSlash[0] !== '/') {
-            // Keep it strict to avoid canonicalization mistakes.
+        if ($path === '' || $path[0] !== '/') {
             throw new ApiException('path must start with "/"');
         }
 
-        // Merge headers with signature (if available)
+        $options['headers'] = $this->buildHeaders($method, $path, $options);
+
+        try {
+            $resp = $this->http->request(strtoupper($method), $path, $options);
+        } catch (GuzzleException $e) {
+            throw new ApiException('Transport error: ' . $e->getMessage());
+        }
+
+        return $this->mapErrors($resp);
+    }
+
+    /**
+     * Merge existing + signature headers.
+     *
+     * @param array<string,mixed> $options
+     * @return array<string,string>
+     */
+    private function buildHeaders(string $method, string $path, array $options): array
+    {
         $headers = (array)($options['headers'] ?? []);
-        $sigHeaders = $this->signatureHeadersOrEmpty($method, $pathWithLeadingSlash);
-        $options['headers'] = array_merge($headers, $sigHeaders);
 
-        /** @var ResponseInterface|null $resp */
-        $resp = null;
+        return array_merge($headers, $this->signatureHeaders($method, $path));
+    }
 
-        // Basic retry/backoff on transport errors only; server errors are mapped below.
-        $attempts    = 0;
-        $maxAttempts = 3;
-        $delayMs     = 150;
-
-        while ($attempts < $maxAttempts) {
-            try {
-                /** @var ResponseInterface $tmp */
-                $tmp = $this->http->request($method, $pathWithLeadingSlash, $options);
-                $resp = $tmp;
-                break; // success
-            } catch (GuzzleException $e) {
-                $attempts++;
-                if ($attempts >= $maxAttempts) {
-                    throw new ApiException($e->getMessage());
-                }
-                usleep($delayMs * 1000);
-                $delayMs *= 2;
-            }
+    /**
+     * Always require credentials (fail fast).
+     *
+     * @return array<string,string>
+     */
+    private function signatureHeaders(string $method, string $path): array
+    {
+        if ($this->config->appId === null || $this->config->skB64Url === null) {
+            throw new ApiException('Missing appId or secret key for request signing');
         }
 
-        if ($resp === null) {
-            // Defensive: should not happen (we either broke or threw above).
-            throw new ApiException('No response received');
-        }
+        $ts = $this->config->now ? ($this->config->now)() : time();
+        $canonical = $this->canonicalV1($method, $path, (string)$ts);
+        $sig = $this->signB64UrlDetached($canonical, $this->config->skB64Url);
 
+        return [
+            'sd-app-id'    => $this->config->appId,
+            'sd-timestamp' => (string)$ts,
+            'sd-signature' => $sig,
+        ];
+    }
+
+    private function canonicalV1(string $method, string $pathAndQuery, string $ts): string
+    {
+        return "v1\n" . strtoupper($method) . "\n{$pathAndQuery}\n{$ts}\n-";
+    }
+
+    /**
+     * Map HTTP responses to domain exceptions.
+     */
+    private function mapErrors(ResponseInterface $resp): ResponseInterface
+    {
         $code = $resp->getStatusCode();
 
         if ($code >= 200 && $code < 300) {
             return $resp;
         }
 
-        // Error mapping (best-effort). Not parsing JSON yet.
-        if ($code === 404) {
-            throw new NotFound('not found', $this->safeBody($resp), $this->safeHeaders($resp));
-        }
+        $body    = $this->safeBody($resp);
+        $headers = $this->safeHeaders($resp);
 
-        if ($code === 422) {
-            throw new ValidationError(
-                'validation failed',
-                [], // details
-                $this->safeBody($resp),
-                $this->safeHeaders($resp)
-            );
-        }
-
-        // Other non-2xx
-        throw new ApiException(
-            'http error ' . $code,
-            $code,
-            $this->safeBody($resp),
-            $this->safeHeaders($resp)
-        );
+        return match ($code) {
+            404 => throw new NotFound('not found', $body, $headers),
+            422 => throw new ValidationError('validation failed', [], $body, $headers),
+            default => throw new ApiException("http error {$code}", $code, $body, $headers),
+        };
     }
 
-    /**
-     * Build SignatureV1 headers if we have appId and a signing key; otherwise return [].
-     *
-     * @return array<string,string>
-     */
-    private function signatureHeadersOrEmpty(string $method, string $pathAndQuery): array
-    {
-        if ($this->config->appId === null || $this->config->skB64Url === null) {
-            return []; // unsigned (ok for /healthz and local smoke)
-        }
-
-        $ts = $this->config->now ? ($this->config->now)() : time();
-        $canonical = $this->canonicalV1($method, $pathAndQuery, (string)$ts);
-        $sig = $this->signB64UrlDetached($canonical, $this->config->skB64Url);
-
-        return [
-          'sd-app-id'    => $this->config->appId,
-          'sd-timestamp' => (string)$ts,
-          'sd-signature' => $sig,
-        ];
-    }
-
-    private function canonicalV1(string $method, string $pathAndQuery, string $ts): string
-    {
-        $methodUp = strtoupper($method);
-
-        return "v1\n{$methodUp}\n{$pathAndQuery}\n{$ts}\n-\n";
-    }
-
-    /**
-     * Sign using libsodium (Ed25519) where env contains a 32-byte seed in base64url (no padding).
-     */
     private function signB64UrlDetached(string $msg, string $seedB64Url): string
     {
         $seed = $this->b64urlDecode($seedB64Url);
@@ -162,10 +134,8 @@ final class Client
         if ($pad !== 0) {
             $b64url .= str_repeat('=', 4 - $pad);
         }
-        /** @var string $out */
-        $out = base64_decode(strtr($b64url, '-_', '+/')) ?: '';
 
-        return $out;
+        return base64_decode(strtr($b64url, '-_', '+/')) ?: '';
     }
 
     /** @return array<string,string|string[]> */
@@ -174,12 +144,11 @@ final class Client
         return $resp->getHeaders();
     }
 
-    /** @return string|null */
     private function safeBody(ResponseInterface $resp): ?string
     {
         try {
             return (string)$resp->getBody();
-        } catch (\Throwable $e) {
+        } catch (\Throwable) {
             return null;
         }
     }

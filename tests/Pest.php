@@ -5,4 +5,10 @@
  * Keep it minimal; no frameworks.
  */
 
-uses()->in('.'); // only scan the tests/ folder
+// Discover tests under tests/
+uses()->in('tests');
+
+// Load integration helpers/hooks only for integration runs.
+if (getenv('SWEETDATE_INTEGRATION') === '1') {
+    require __DIR__ . '/Support/Integration.php';
+}
