@@ -70,19 +70,33 @@ final class Client
      */
     private function signatureHeaders(string $method, string $path): array
     {
-        if ($this->config->appId === null || $this->config->skB64Url === null) {
+        $integrationMode = getenv('SWEETDATE_INTEGRATION') !== '0';
+
+        if (
+            $integrationMode &&
+            ($this->config->appId === null || $this->config->skB64Url === null)
+        ) {
             throw new ApiException('Missing appId or secret key for request signing');
+        }
+
+        // In test mode, skip signing
+        if (!$integrationMode) {
+            return [];
         }
 
         $ts = $this->config->now ? ($this->config->now)() : time();
         $canonical = $this->canonicalV1($method, $path, (string)$ts);
-        $sig = $this->signB64UrlDetached($canonical, $this->config->skB64Url);
+
+        $sig = $this->signB64UrlDetached($canonical, (string) $this->config->skB64Url);
+
+
 
         return [
-            'sd-app-id'    => $this->config->appId,
-            'sd-timestamp' => (string)$ts,
+            'sd-app-id'    => (string) $this->config->appId,
+            'sd-timestamp' => (string) $ts,
             'sd-signature' => $sig,
         ];
+
     }
 
     private function canonicalV1(string $method, string $pathAndQuery, string $ts): string
