@@ -16,6 +16,7 @@ jobs:
         php: ["8.1", "8.2", "8.3"]
     env:
       SWEETDATE_APP_ID: ${{ secrets.SWEETDATE_APP_ID }}
+      SWEETDATE_SK_B64URL: ${{ secrets.SWEETDATE_SK_B64URL }}
       SWEETDATE_INTEGRATION: 0
 
     steps:
@@ -42,6 +43,12 @@ jobs:
 
       - name: Install dependencies
         run: composer install --no-interaction --prefer-dist --no-progress
+
+      - name: Debug env
+        run: |
+          echo "SWEETDATE_APP_ID=$SWEETDATE_APP_ID"
+          echo "SWEETDATE_SK_B64URL=$SWEETDATE_SK_B64URL"
+          echo "SWEETDATE_INTEGRATION=$SWEETDATE_INTEGRATION"
 
       - name: Run tests (Pest)
         run: composer test
