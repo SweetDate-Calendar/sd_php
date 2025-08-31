@@ -8,6 +8,21 @@ use SweetDate\Exceptions\ApiException;
 use SweetDate\Internal\RequestBuilder;
 use SweetDate\Internal\ResponseValidator;
 
+/**
+ * @phpstan-type TenantJson array{
+ *   id: string,
+ *   name: string,
+ *   created_at?: string,
+ *   updated_at?: string,
+ *   inserted_at?: string
+ * }
+ * @phpstan-type GetResponse array{
+ *   status: string,
+ *   tenant: TenantJson
+ * }
+ */
+
+
 final class Tenant
 {
     /**
@@ -121,6 +136,11 @@ final class Tenant
 
         ResponseValidator::requireKeys($json, ['status', 'tenant'], 'tenants.create');
 
+
+        /** @var array $json */
+        /** @phpstan-var GetResponse $json */
+
+
         return $json;
     }
 
@@ -128,26 +148,27 @@ final class Tenant
     /**
      * Get a single tenant by ID.
      * Command: TENANTS.GET
-     * endpoint /api/v1/tenants/:id
+     * Endpoint: /api/v1/tenants/:id
      *
-     * @param string $id  Path parameter.
      *
      * Example response:
-     *   {
-     *     "status": "ok",
-     *     "tenant": {
-     *       "id": "00000000-0000-0000-0000-000000000000",
-     *       "inserted_at": "2025-08-18T09:20:00Z",
-     *       "name": "Building 4",
-     *       "updated_at": "2025-08-19T10:15:00Z"
-     *     }
+     * {
+     *   "status": "ok",
+     *   "tenant": {
+     *     "id": "00000000-0000-0000-0000-000000000000",
+     *     "inserted_at": "2025-08-18T09:20:00Z",
+     *     "name": "Building 4",
+     *     "updated_at": "2025-08-19T10:15:00Z"
      *   }
+     * }
      *
      * Error response:
-     *   {
-     *     "message": "not found",
-     *     "status": "error"
-     *   }     */
+     * {
+     *   "message": "not found",
+     *   "status": "error"
+     * }
+     * @phpstan-ignore-next-line
+     */
     public static function get(string $id): array
     {
         $cfg    = Config::fromEnv();
@@ -199,7 +220,9 @@ final class Tenant
      *     },
      *     "message": "validation failed",
      *     "status": "error"
-     *   }     */
+     *   }
+     * @phpstan-ignore-next-line
+     *    */
     public static function update(string $id, string $name): array
     {
         $cfg    = Config::fromEnv();
@@ -232,28 +255,29 @@ final class Tenant
 
 
     /**
-     * Delete a tenant.
-     * Command: TENANTS.DELETE
-     * endpoint /api/v1/tenants/:id
-     *
-     * @param string $id  Path parameter.
-     *
-     * Example response:
-     *   {
-     *     "status": "ok",
-     *     "tenant": {
-     *       "id": "00000000-0000-0000-0000-000000000000",
-     *       "inserted_at": "2025-08-18T09:20:00Z",
-     *       "name": "Terminal 3 3/4",
-     *       "updated_at": "2025-08-19T10:15:00Z"
-     *     }
-     *   }
-     *
-     * Error response:
-     *   {
-     *     "message": "not found",
-     *     "status": "error"
-     *   }     */
+    * Delete a tenant.
+    * Command: TENANTS.DELETE
+    * endpoint /api/v1/tenants/:id
+    *
+    *
+    * Example response:
+    *   {
+    *     "status": "ok",
+    *     "tenant": {
+    *       "id": "00000000-0000-0000-0000-000000000000",
+    *       "inserted_at": "2025-08-18T09:20:00Z",
+    *       "name": "Terminal 3 3/4",
+    *       "updated_at": "2025-08-19T10:15:00Z"
+    *     }
+    *   }
+    *
+    * Error response:
+    *   {
+    *     "message": "not found",
+    *     "status": "error"
+    *   }
+    * @phpstan-ignore-next-line
+    * */
     public static function delete(string $id): array
     {
         $cfg    = Config::fromEnv();

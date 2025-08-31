@@ -48,12 +48,14 @@ final class Client
         return $this->mapErrors($resp);
     }
 
+
     /**
      * Merge existing + signature headers.
      *
      * @param array<string,mixed> $options
-     * @return array<string,string>
+     * @return array<string,mixed>
      */
+
     private function buildHeaders(string $method, string $path, array $options): array
     {
         $headers = (array)($options['headers'] ?? []);
