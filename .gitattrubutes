@@ -9,3 +9,4 @@
 .phpstan.neon export-ignore
 .editorconfig export-ignore
 .gitignore export-ignore
+.mise.toml
