@@ -5,4 +5,8 @@
  * Keep it minimal; no frameworks.
  */
 
-uses()->in('.'); // only scan the tests/ folder
+// Discover tests under tests/
+uses()->in('tests');
+
+// Load integration helpers/hooks only for integration runs.
+require __DIR__ . '/Support/Integration.php';

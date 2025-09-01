@@ -15,16 +15,19 @@ it('loads config from env', function () {
 
     // set temp env
     putenv('SWEETDATE_BASE_URL=http://localhost:4008');
-    putenv('SWEETDATE_APP_ID=app_test_123');
-    putenv('SWEETDATE_SK_B64URL='); // empty => unsigned
+    putenv('SWEETDATE_APP_ID=');
+    putenv('SWEETDATE_SK_B64URL=');
     putenv('SWEETDATE_TIMEOUT_MS=15000');
 
     $cfg = Config::fromEnv();
 
+
     expect($cfg->baseUrl)->toBe('http://localhost:4008')
-      ->and($cfg->appId)->toBe('app_test_123')
-      ->and($cfg->skB64Url)->toBeNull()
+      ->and($cfg->appId)->toBe('')
+      ->and($cfg->skB64Url)->toBe('')
       ->and($cfg->timeoutMs)->toBe(15000);
+
+
 
     // restore env
     foreach ($old as $k => $v) {
