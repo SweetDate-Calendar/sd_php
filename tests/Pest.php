@@ -9,6 +9,4 @@
 uses()->in('tests');
 
 // Load integration helpers/hooks only for integration runs.
-if (getenv('SWEETDATE_INTEGRATION') === '1') {
-    require __DIR__ . '/Support/Integration.php';
-}
+require __DIR__ . '/Support/Integration.php';
