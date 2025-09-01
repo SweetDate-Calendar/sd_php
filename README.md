@@ -2,6 +2,10 @@
 
 # SweetDate PHP Client SDK
 
+🚧 This package is under active development.  
+❗ It is not stable, documented, or supported.  
+🧪 Use at your own risk – or wait for the `v1.0` release.
+
 The official PHP SDK for the [SweetDate Calendar Engine](https://sweetdate.io/).  
 This package provides a simple client for interacting with the SweetDate REST API.
 

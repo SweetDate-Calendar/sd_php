@@ -1,6 +1,7 @@
 {
   "name": "sweetdate/client",
-  "description": "SweetDate PHP Client SDK",
+  "description": "DO NOT USE — under development",
+  "private": true,
   "type": "library",
   "license": "MIT",
   "require": {
